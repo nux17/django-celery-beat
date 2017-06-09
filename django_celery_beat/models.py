@@ -294,12 +294,18 @@ class PeriodicTask(models.Model):
             })
 
     def save(self, *args, **kwargs):
+        enabled = self.enabled
         self.exchange = self.exchange or None
         self.routing_key = self.routing_key or None
         self.queue = self.queue or None
         if not self.enabled:
             self.last_run_at = None
+	else:
+            self.enabled = False
         super(PeriodicTask, self).save(*args, **kwargs)
+        if enabled:
+            self.enabled = True
+            super(PeriodicTask, self).save(*args, **kwargs)
 
     def __str__(self):
         fmt = '{0.name}: {{no schedule}}'
